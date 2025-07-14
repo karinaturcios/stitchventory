@@ -1,0 +1,40 @@
+div.projectPage {
+    display: flex;
+    flex-direction: row;
+    margin-top: 5em;
+}
+
+div.currentProjects {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+div.searchBar {
+    display: flex;
+    flex-direction: row;
+}
+
+h2.pageTitle {
+    color: pink;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+}
+
+input.searchInput {
+    background-color: white;
+    color: black;
+    width: 270px;
+    margin-bottom: 0.75em;
+    border-radius: 3px;
+    text-align: center;
+}
+
+button.searchButton {
+    width: 70px;
+    text-align: center;
+    padding: 0;
+    background-color: pink;
+    color: gray;
+}
