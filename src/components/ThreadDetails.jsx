@@ -6,7 +6,7 @@ const ThreadDetails = ({ thread }) => {
 
     return (
         <div>
-            <h1>Thread Details</h1>
+            <h2>Thread Details</h2>
             <ThreadCard thread={thread} />
         </div>
     );
