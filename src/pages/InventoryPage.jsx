@@ -3,10 +3,22 @@ import ThreadDetails from '../components/ThreadDetails.jsx';
 import AddThreadForm from '../components/AddThreadForm.jsx';
 import { useState, useEffect } from 'react';
 import flossList from '../data/flossList.json'; // Assuming you have a data file for threads
+import SearchBar from '../components/SearchBar.jsx';
 
 export default function InventoryPage() {
+
     const [selectedThread, setSelectedThread] = useState(null); // State for selected thread to show details
-    const [showAddThreadForm, setShowAddThreadForm] = useState(false); // State to toggle Add Thread Form visibility
+    const [threads, setThreads] = useState(() => {
+        return JSON.parse(localStorage.getItem('threads')) || [];
+    }); // Added threads in the user's inventory or an empty array if none exist
+    const [formType, setFormType] = useState(null); // State to manage form type if needed
+
+
+    useEffect(() => {
+        if (selectedThread && !threads.some(t => t.dmcCode === selectedThread.dmcCode)) {
+            setSelectedThread(null);
+        }
+    }, [threads, selectedThread]); // Effect to reset selected thread if it is not in the current threads
 
     const transformedFlossList = Object.values(flossList).map((thread) => ({
         dmcCode: thread.number,
@@ -15,46 +27,67 @@ export default function InventoryPage() {
         hex: `#${thread.hex}`
     })); //Transform the flossList data to match the expected structure
 
-    const [threads, setThreads] = useState([]); // Added threads in the user's inventory
     
     const threadCount = threads.length; // Counts number of colors owned
+    const totalColors = transformedFlossList.length; // Total number of colors in the inventory
 
-    const showForm = () => {
-        setShowAddThreadForm(!showAddThreadForm);
-    }; // Toggle the visibility of the Add Thread Form
 
-    const handleAddThread = (newThread) => {
+    const handleAddThread = (newThreads) => {
         setThreads((prevThreads) => {
-            const existingThreads = prevThreads.find(
-                (t) => t.dmcCode === newThread.dmcCode
-            );
-            if (existingThreads) {
-                return prevThreads.map((t) =>
-                t.dmcCode === newThread.dmcCode
-                    ? { ...t, quantity: t.quantity + newThread.quantity } // Increment quantity if thread already exists
-                    : t
-                );
-            } else {
-                return [...prevThreads, newThread]; // Add new thread if it doesn't exist
+            const updated = [...prevThreads]; // creates a copy of the previous threads
+
+            if(!Array.isArray(newThreads)) {
+                newThreads = [newThreads]; // Ensure newThreads is always an array
             }
+
+            newThreads.forEach((newThread) => {
+                const index = updated.findIndex(t => t.dmcCode === newThread.dmcCode); // checks if the new thread already exists in the inventory
+
+                if (index !== -1) {
+                    updated[index] = {
+                        ...updated[index],
+                        quantity: updated[index].quantity + newThread.quantity
+                    };
+                } else {
+                    updated.push(newThread);
+                }; // If it exists, update the quantity, otherwise add the new thread
+            });
+            return updated;
         });
 
-        setShowAddThreadForm(false); // hide form after adding thread
     }; // Function to add the new thread to the inventory
+
+    const handleDeleteThread = (dmcCode) => {
+        setThreads((prevThreads) => 
+            prevThreads.filter((thread) => thread.dmcCode !== dmcCode)
+        );
+    }; // Function to delete a thread from the inventory
+
+    useEffect(() => {
+        localStorage.setItem('threads', JSON.stringify(threads)); // Save threads to local storage
+    }, [threads]);
+
+    const showSingleForm = () => setFormType('single'); // Function to set form type to single
+    const showMultiForm = () => setFormType('multi'); // Function to set form type to multi
+    const closeForm = () => setFormType(null); // Function to close the form
 
     return(
         <div className="grid grid-cols-2 h-dvh">
             <div className="bg-cyan-400 py-25 px-10">
                 <h2 className="text-[60px] mb-7">Current Inventory</h2>
-                <input type="search" className="border-2" placeholder="Search for Threads"/>
-                <button onClick={showForm}>Add Thread</button>
+                <SearchBar />
+                <button className="bg-gray-500 hover:bg-purple-400" onClick={showSingleForm}>Add Thread</button>
+                <button className="bg-gray-500 hover:bg-purple-400" onClick={showMultiForm}>Multi-Add Threads</button>
+                <button className="bg-gray-500 hover:bg-purple-400" onClick={() => setThreads([])}>Clear Inventory</button>
                 <div>
                     {threadCount > 0 ? (
                         <div>
                         <ThreadList 
                         threads={threads} 
                         threadCount={threadCount}
-                        onThreadSelect={setSelectedThread}/>
+                        totalColors={totalColors}
+                        onThreadSelect={setSelectedThread}
+                        onDeleteThread={handleDeleteThread}/>
                         </div>
                 ) : (
                     <p>You currently have no threads in your inventory. Add some now!</p>
@@ -70,7 +103,23 @@ export default function InventoryPage() {
                 <p>Select a thread to see details.</p>
             ) }
             <div>
-                {showAddThreadForm && <AddThreadForm masterThreadData={transformedFlossList} onAddThread={handleAddThread}/>}
+                {formType === "single" && 
+                (<AddThreadForm 
+                    masterThreadData={transformedFlossList} 
+                    onAddThread={handleAddThread}
+                    mode="single"
+                    onClose={closeForm}
+                    />
+                )}
+
+                {formType === "multi" && 
+                (<AddThreadForm
+                    masterThreadData={transformedFlossList}
+                    onAddThread={handleAddThread}
+                    mode="multi"
+                    onClose={closeForm}
+                    />
+                )}
             </div>
             </div>
         </div>
