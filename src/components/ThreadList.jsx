@@ -1,10 +1,17 @@
 import '../styles/threadlist.css';
 
-const ThreadList = ({ threads, threadCount, onThreadSelect, onDeleteThread, totalColors}) => {
+const ThreadList = ({ threads, threadCount, onThreadSelect, onDeleteThread, totalColors, searchTerm}) => {
+    const filteredItems = !searchTerm
+    ? threads
+    : threads.filter((thread) => 
+        thread.dmcCode.includes(searchTerm) ||
+        thread.colorName.toLowerCase().includes(searchTerm)
+);
 
     return (
         <div>
             <p>You have {threadCount} out of {totalColors} colors. Way to go!</p>
+            <div className="max-h-[500px] overflow-y-auto">
             <table className="table-auto border-collapse w-full text-left">
                 <thead className="bg-purple-300">
                     <tr>
@@ -15,7 +22,7 @@ const ThreadList = ({ threads, threadCount, onThreadSelect, onDeleteThread, tota
                     </tr>
                 </thead>
                 <tbody>
-                    {threads.map((thread) => (
+                    {filteredItems.map((thread) => (
                         <tr key={thread.dmcCode} 
                             className="hover:bg-pink-100 cursor-pointer group"
                             onClick={() => onThreadSelect(thread)}
@@ -47,6 +54,7 @@ const ThreadList = ({ threads, threadCount, onThreadSelect, onDeleteThread, tota
                 </tbody>
             </table>
         </div>
+    </div>
     );
 };
 

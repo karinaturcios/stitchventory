@@ -11,8 +11,7 @@ export default function InventoryPage() {
     const [threads, setThreads] = useState(() => {
         return JSON.parse(localStorage.getItem('threads')) || [];
     }); // Added threads in the user's inventory or an empty array if none exist
-    const [formType, setFormType] = useState(null); // State to manage form type if needed
-
+    const [searchTerm, setSearchTerm] = useState();
 
     useEffect(() => {
         if (selectedThread && !threads.some(t => t.dmcCode === selectedThread.dmcCode)) {
@@ -46,7 +45,7 @@ export default function InventoryPage() {
                 if (index !== -1) {
                     updated[index] = {
                         ...updated[index],
-                        quantity: updated[index].quantity + newThread.quantity
+                        quantity: Number(updated[index].quantity) + Number(newThread.quantity)
                     };
                 } else {
                     updated.push(newThread);
@@ -67,17 +66,14 @@ export default function InventoryPage() {
         localStorage.setItem('threads', JSON.stringify(threads)); // Save threads to local storage
     }, [threads]);
 
-    const showSingleForm = () => setFormType('single'); // Function to set form type to single
-    const showMultiForm = () => setFormType('multi'); // Function to set form type to multi
-    const closeForm = () => setFormType(null); // Function to close the form
-
     return(
         <div className="grid grid-cols-2 h-dvh">
             <div className="bg-cyan-400 py-25 px-10">
                 <h2 className="text-[60px] mb-7">Current Inventory</h2>
-                <SearchBar />
-                <button className="bg-gray-500 hover:bg-purple-400" onClick={showSingleForm}>Add Thread</button>
-                <button className="bg-gray-500 hover:bg-purple-400" onClick={showMultiForm}>Multi-Add Threads</button>
+                <SearchBar
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                />
                 <button className="bg-gray-500 hover:bg-purple-400" onClick={() => setThreads([])}>Clear Inventory</button>
                 <div>
                     {threadCount > 0 ? (
@@ -87,7 +83,8 @@ export default function InventoryPage() {
                         threadCount={threadCount}
                         totalColors={totalColors}
                         onThreadSelect={setSelectedThread}
-                        onDeleteThread={handleDeleteThread}/>
+                        onDeleteThread={handleDeleteThread}
+                        searchTerm={searchTerm}/>
                         </div>
                 ) : (
                     <p>You currently have no threads in your inventory. Add some now!</p>
@@ -103,23 +100,10 @@ export default function InventoryPage() {
                 <p>Select a thread to see details.</p>
             ) }
             <div>
-                {formType === "single" && 
-                (<AddThreadForm 
+                <AddThreadForm 
                     masterThreadData={transformedFlossList} 
                     onAddThread={handleAddThread}
-                    mode="single"
-                    onClose={closeForm}
-                    />
-                )}
-
-                {formType === "multi" && 
-                (<AddThreadForm
-                    masterThreadData={transformedFlossList}
-                    onAddThread={handleAddThread}
-                    mode="multi"
-                    onClose={closeForm}
-                    />
-                )}
+                />
             </div>
             </div>
         </div>

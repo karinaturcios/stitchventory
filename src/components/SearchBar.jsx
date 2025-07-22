@@ -1,11 +1,12 @@
-const SearchBar = ({ value, onChange }) => {
+const SearchBar = ({ searchTerm, setSearchTerm }) => {
+
     return(
         <input
         type="search"
         className="border-2 w-full p-2 mb-4"
         placeholder="Search for Threads..."
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
         />
     )
 };
