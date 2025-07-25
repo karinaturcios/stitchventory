@@ -1,9 +1,23 @@
 import ProjectCard from "./ProjectCard";
 
-const ProjectList = () => {
+const ProjectList = ({ projects, handleProjectSelect }) => {
+
     return (
-        <div>
-            <ProjectCard />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap 4">
+            {projects.map((project) => (
+                <ul key={project.id}>
+                    <li className="hover:bg-pink-200 p-4 rounded-lg cursor-pointer"
+                        onClick={() => handleProjectSelect(project)}
+                    >
+                        <ProjectCard
+                            title={project.title}
+                            thumbnail={project.thumbnail}
+                            colorsOwned= "0"
+                            totalColors={project.totalColors}
+                        />
+                    </li>
+                </ul>
+            ))}
         </div>
     );
 };

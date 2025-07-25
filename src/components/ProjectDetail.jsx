@@ -1,13 +1,16 @@
 import "../styles/projectdetail.css";
+import ProjectKeyTable from "./ProjectKeyTable";
 
-const ProjectDetail = () => {
-const projectTitle = "Flower Sampler";
+const ProjectDetail = ({ project }) => {
+    if (!project) {
+        return <div>Select a project to see more details</div>
+    }
 
     return (
         <div>
-            <h2>{projectTitle}</h2>
-            <img className="mx-auto selectedProjectThumbnail" src="src/assets/image-placeholder.svg"/>
-            <p>Key Table goes here.</p>
+            <h2>{project.title}</h2>
+            <img className="mx-auto selectedProjectThumbnail" src={project.thumbnail}/>
+            <ProjectKeyTable />
         </div>
     );
 };

@@ -1,5 +1,10 @@
+h3 {
+    font-size: 1.25em;
+    font-weight: bold;
+}
+
 img.projectThumbnail {
-    height: 30%;
-    width: 30%;
+    height: 70%;
+    width: 70%;
 }
 

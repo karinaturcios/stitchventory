@@ -101,7 +101,7 @@ export default function InventoryPage() {
             ) }
             <div>
                 <AddThreadForm 
-                    masterThreadData={transformedFlossList} 
+                    masterThreadData={transformedFlossList}
                     onAddThread={handleAddThread}
                 />
             </div>

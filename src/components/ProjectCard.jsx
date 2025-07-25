@@ -1,16 +1,15 @@
 import "../styles/projectcard.css";
 
-const ProjectCard = () => {
+const ProjectCard = ({ title, thumbnail, colorsOwned, totalColors }) => {
     return (
         <div>
-            <h3>Project Title</h3>
+            <h3>{title}</h3>
             <img 
             className="mx-auto projectThumbnail" 
-            src="/src/assets/image-placeholder.svg" 
+            src={thumbnail}
             alt="Project Thumbnail"
-
             />
-            <p>Status: In Progress</p>
+            <p>{colorsOwned}/{totalColors} Colors Owned</p>
         </div>
     );
 };
