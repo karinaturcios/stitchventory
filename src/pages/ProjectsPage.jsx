@@ -2,16 +2,33 @@ import ProjectList from "../components/ProjectList.jsx";
 import ProjectDetail from "../components/ProjectDetail.jsx";
 import AddProjectForm from "../components/AddProjectForm.jsx";  
 import "../styles/projectspage.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ProjectsPage() {
 const [selectedProject, setSelectedProject] = useState(null);
 const [showAddProjectForm, setShowAddProjectForm] = useState(false);
-const [projects, setProjects] = useState([]);
+const [projects, setProjects] = useState(() => {
+    return JSON.parse(localStorage.getItem('projects')) || [];
+});
 
 const handleProjectSelect = (project) => {
     setSelectedProject(project);
 }
+
+const addProject = (newProject) => {
+    setProjects((prev) => [...prev, newProject]);
+};
+
+useEffect(() => {
+    localStorage.setItem('projects', JSON.stringify(projects));
+}, [projects]); // Save projects to localStorage whenever they change
+
+useEffect(() => {
+    const savedProjects = localStorage.getItem('projects');
+    if (savedProjects) {
+        setProjects(JSON.parse(savedProjects));
+    }
+}, []); // Load projects from localStorage on initial render
 
     return(
         <div className="grid grid-cols-2 h-dvh">
@@ -29,7 +46,7 @@ const handleProjectSelect = (project) => {
             </div>
             <div className="bg-violet-400 py-30 px-10">
                 <div>
-                    {showAddProjectForm && <AddProjectForm />}
+                    {showAddProjectForm ? (<AddProjectForm onAddProject={addProject} onClose={() => setShowAddProjectForm(false)} />) : (null)}
                 </div>
                 <ProjectDetail
                 project={selectedProject}/>

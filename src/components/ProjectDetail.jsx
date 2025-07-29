@@ -10,7 +10,7 @@ const ProjectDetail = ({ project }) => {
         <div>
             <h2>{project.title}</h2>
             <img className="mx-auto selectedProjectThumbnail" src={project.thumbnail}/>
-            <ProjectKeyTable />
+            <ProjectKeyTable keyTableData={project.keyTable} />
         </div>
     );
 };

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import AddProjectPageOne from './AddProjectPageOne.jsx';
 import AddProjectPageTwo from './AddProjectPageTwo.jsx';
 
-const AddProjectForm = () => {
+const AddProjectForm = ({ onAddProject, onClose }) => {
 // State to manage the current step and project data
 const [step, setStep] = useState(1);
 const [projectData, setProjectData] = useState({
@@ -24,6 +24,8 @@ const handleFinalSubmit = (keyTableData) => {
         ...projectData,
         keyTable: keyTableData
     };
+    onAddProject(finalProject);
+    onClose();
     console.log('Final Project Data:', finalProject);
 };
 
