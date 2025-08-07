@@ -4,26 +4,26 @@ const AddProjectPageOne = ({ onNext }) => {
     const [title, setTitle] = useState('');
     const [thumbnail, setThumbnail] = useState('');
     const [colorCount, setColorCount] = useState(0);
-    const [imageFile, setImageFile] = useState(null);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onloadend = () => {
-            setThumbnail(reader.result); // Set the thumbnail to the file's data URL
+            const base64Image = reader.result
+            setThumbnail(base64Image); // Set the thumbnail to the file's data URL
         }
 
         if (file) {
             reader.readAsDataURL(file); // Read the file as a data URL
         }
-        console.log("Image file selected:", file);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        console.log("Submitting with thumbnail:", thumbnail);
         onNext({
             title,
-            thumbnail: imageFile,
+            thumbnail: thumbnail,
             colorCount: parseInt(colorCount)
         });
     };
@@ -47,7 +47,6 @@ const AddProjectPageOne = ({ onNext }) => {
                     className="text-sm text-gray-900 border border-gray-300 rounded-md hover:file:cursor-pointer bg-white file:bg-pink-200 hover:file:bg-pink-300"
                     type="file"
                     accept="image/*"
-                    value={thumbnail}
                     onChange={handleImageChange}
                 />
 

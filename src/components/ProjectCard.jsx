@@ -1,7 +1,6 @@
 import "../styles/projectcard.css";
 
 const ProjectCard = ({ title, thumbnail, colorsOwned, totalColors }) => {
-    console.log("thumbnail url:", thumbnail);
     return (
         <div>
             <h3>{title}</h3>
