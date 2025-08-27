@@ -1,42 +1,53 @@
 import ThreadList from '../components/ThreadList.jsx';
 import ThreadDetails from '../components/ThreadDetails.jsx';
 import AddThreadForm from '../components/AddThreadForm.jsx';
+import ProjectDetailModal from '../components/ProjectDetailModal.jsx';
 import { useState, useEffect } from 'react';
-import flossList from '../data/flossList.json'; // Assuming you have a data file for threads
+import flossList from '../data/flossList.json';
 import SearchBar from '../components/SearchBar.jsx';
 import { useDispatch, useSelector } from 'react-redux';
-import { addThreads, deleteThread } from '../redux/threadsSlice.js';
-import { setThreads as setThreadsRedux } from '../redux/threadsSlice.js';
+import { addThreads, deleteThread, updateThreadQuantity, setThreads as setThreadsRedux } from '../redux/threadsSlice.js';
+import { useNavigate } from 'react-router-dom';
 
 export default function InventoryPage() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const threads = useSelector(state => state.threads.threads); // Get threads from Redux store
-    const [selectedThread, setSelectedThread] = useState(null); // State for selected thread to show details
-    const [searchTerm, setSearchTerm] = useState();
+    const currentProjects = useSelector(state => state.projects.projects); // Get current projects from Redux store
+    
+    const [selectedThreadCode, setSelectedThreadCode] = useState(null); // State for selected thread to show details
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedProject, setSelectedProject] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
+    const selectedThread = threads.find(t => t.dmcCode === selectedThreadCode) || null;
+
+    // LOAD THREADS FROM STORAGE
     useEffect(()=> {
         const savedThreads = JSON.parse(localStorage.getItem('threads')) || [];
         dispatch(setThreadsRedux(savedThreads)); // Load threads from local storage into Redux store
-    }, [dispatch]); // Effect to load threads from local storage on component mount
+    }, [dispatch]);
 
-    useEffect(() => {
-        if (selectedThread && !threads.some(t => t.dmcCode === selectedThread.dmcCode)) {
-            setSelectedThread(null);
-        }
-    }, [threads, selectedThread]); // Effect to reset selected thread if it is not in the current threads
-
+    // SAVE THREADS TO STORAGE
     useEffect(() => {
         localStorage.setItem('threads', JSON.stringify(threads));
-    }, [threads]); // Save threads to local storage whenever they change
+    }, [threads]);
+
+    //RESET MODAL IF DIFFERENT THREAD IS SELECTED
+    useEffect(() => {
+        if (selectedThread) {
+            setIsModalOpen(false);
+        }
+    }, [selectedThread]);
 
     const transformedFlossList = Object.values(flossList).map((thread) => ({
         dmcCode: thread.number,
         colorName: thread.readableName,
         searchName: thread.searchName,
         hex: `#${thread.hex}`
-    })); //Transform the flossList data to match the expected structure
+    }));
 
-    
     const threadCount = threads.length; // Counts number of colors owned
     const totalColors = transformedFlossList.length; // Total number of colors in the inventory
 
@@ -47,7 +58,47 @@ export default function InventoryPage() {
 
     // DELETE THREADS FROM INVENTORY
     const handleDeleteThread = (dmcCode) => {
-        dispatch(deleteThread(dmcCode)); // Update the Redux store with the filtered threads
+        dispatch(deleteThread(dmcCode));
+        if (selectedThreadCode === dmcCode) setSelectedThreadCode(null);
+    };
+
+    // FIND PROJECTS USING SELECTED THREAD
+    const projectsUsingThread = (thread) => {
+        if (!thread) return [];
+        return currentProjects.filter(project => 
+            project.keyTable.some(entry => entry.dmcCode === thread.dmcCode)
+        ).map(project => project);
+    };
+
+    // HANDLE CLICK ON PROJECT NAME IN THREAD DETAILS
+    const handleProjectClick = (projectTitle) => {
+        const project = currentProjects.find(p => p.title === projectTitle);
+        if (project) {
+            setSelectedProject(project);
+            setIsModalOpen(true);
+        };
+    };
+
+    // CLOSE PROJECT DETAIL MODAL
+    const closeModal = () => {
+        setSelectedProject(null);
+        setIsModalOpen(false);
+    };
+
+    // UPDATE THREAD QUANTITY
+    const handleQuantityChange = (delta) => {
+        if (!selectedThread) return;
+        const newQuantity = Math.max(0, selectedThread.quantity + delta);
+        if (newQuantity === 0) {
+            handleDeleteThread(selectedThread.dmcCode);
+        } else {
+            dispatch(updateThreadQuantity({ dmcCode: selectedThread.dmcCode, quantity: newQuantity }));
+        }
+    };
+
+    const handleViewDetails = (projectId) => {
+        localStorage.setItem('selectedProjectId', projectId);
+        window.location.href = '/projects';
     };
 
     return(
@@ -59,6 +110,7 @@ export default function InventoryPage() {
                 setSearchTerm={setSearchTerm}
                 />
                 <button className="bg-gray-500 hover:bg-purple-400" onClick={() => dispatch(setThreadsRedux([]))}>Clear Inventory</button>
+                <button className="bg-gray-500 hover:bg-purple-400 ml-4" onClick={() => setIsAddFormOpen(!isAddFormOpen)}>Add Inventory</button>
                 <div>
                     {threadCount > 0 ? (
                         <div>
@@ -66,7 +118,7 @@ export default function InventoryPage() {
                         threads={threads} 
                         threadCount={threadCount}
                         totalColors={totalColors}
-                        onThreadSelect={setSelectedThread}
+                        onThreadSelect={setSelectedThreadCode}
                         onDeleteThread={handleDeleteThread}
                         searchTerm={searchTerm}/>
                         </div>
@@ -78,16 +130,29 @@ export default function InventoryPage() {
             <div className="bg-violet-400 py-30 px-10">
                 {selectedThread ? (
                 <div>
-                    <ThreadDetails thread={selectedThread}/>
+                    <ThreadDetails 
+                    thread={selectedThread}
+                    projectsUsed={projectsUsingThread(selectedThread)}
+                    handleViewDetails={handleViewDetails}
+                    onQuantityChange={handleQuantityChange}
+                    />
+
+                    {isModalOpen && selectedProject && (
+                        <ProjectDetailModal
+                        project={selectedProject}
+                        onClose={closeModal}/>
+                    )}
                 </div>
             ) : (
                 <p>Select a thread to see details.</p>
             ) }
             <div>
+                {isAddFormOpen && (
                 <AddThreadForm 
                     masterThreadData={transformedFlossList}
                     onAddThread={handleAddThread}
                 />
+                )}
             </div>
             </div>
         </div>

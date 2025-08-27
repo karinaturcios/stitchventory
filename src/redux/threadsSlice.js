@@ -22,6 +22,13 @@ const threadsSlice = createSlice({
                 }
             })
         },
+        updateThreadQuantity: (state, action) => {
+            const { dmcCode, quantity } = action.payload;
+            const thread = state.threads.find(t => t.dmcCode === dmcCode);
+            if (thread) {
+                thread.quantity = quantity;
+            }
+        },
         deleteThread: (state, action) => {
             state.threads = state.threads.filter(t => t.dmcCode !== action.payload);
         },
@@ -32,7 +39,7 @@ const threadsSlice = createSlice({
     },
 });
 
-export const { setThreads, addThreads, clearThreads, deleteThread} = threadsSlice.actions;
+export const { setThreads, addThreads, clearThreads, updateThreadQuantity, deleteThread} = threadsSlice.actions;
 
 //SELECTORS
 export const selectAllThreadCodes = (state) => state.threads.threads.map(t => t.dmcCode);

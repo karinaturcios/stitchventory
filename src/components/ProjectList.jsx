@@ -1,6 +1,6 @@
 import ProjectCard from "./ProjectCard";
 
-const ProjectList = ({ projects, handleProjectSelect, inventoryCodes, checkThreads }) => {
+const ProjectList = ({ projects, handleProjectSelect, inventoryCodes, checkThreads, handleDeleteProject }) => {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap 4">
@@ -17,6 +17,7 @@ const ProjectList = ({ projects, handleProjectSelect, inventoryCodes, checkThrea
                             thumbnail={project.thumbnail}
                             colorsOwned= {fulfilled.length}
                             totalColors={project.keyTable.length}
+                            handleDeleteProject={handleDeleteProject}
                         />
                     </li>
                 </ul>

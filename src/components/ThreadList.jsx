@@ -10,6 +10,7 @@ const ThreadList = ({ threads, threadCount, onThreadSelect, onDeleteThread, tota
 
     return (
         <div>
+            <progress className="w-full mt-4 [&::-webkit-progress-bar]:rounded-lg" value={threadCount} max={totalColors} />
             <p>You have {threadCount} out of {totalColors} colors. Way to go!</p>
             <div className="max-h-[500px] overflow-y-auto">
             <table className="table-auto border-collapse w-full text-left">
@@ -25,7 +26,7 @@ const ThreadList = ({ threads, threadCount, onThreadSelect, onDeleteThread, tota
                     {filteredItems.map((thread) => (
                         <tr key={thread.dmcCode} 
                             className="hover:bg-pink-100 cursor-pointer group"
-                            onClick={() => onThreadSelect(thread)}
+                            onClick={() => onThreadSelect(thread.dmcCode)}
                             >
                             <td className="px-4 py-2">{thread.dmcCode}</td>
                             <td className="px-4 py-2">

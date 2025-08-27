@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import AddProjectPageOne from './AddProjectPageOne.jsx';
 import AddProjectPageTwo from './AddProjectPageTwo.jsx';
 
@@ -21,6 +22,7 @@ const handlePageOneSubmit = (data) => {
 // Submits project data & key table data
 const handleFinalSubmit = (keyTableData) => {
     const finalProject = {
+        id: uuidv4(),
         ...projectData,
         keyTable: keyTableData
     };

@@ -3,15 +3,14 @@ import ProjectDetail from "../components/ProjectDetail.jsx";
 import AddProjectForm from "../components/AddProjectForm.jsx";  
 import "../styles/projectspage.css";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { addProject, clearProjects, deleteProject, setProjects as setProjectsRedux } from "../redux/projectsSlice.js";
 
 export default function ProjectsPage() {
+const dispatch = useDispatch();
+const projects = useSelector(state => state.projects.projects);
 const [selectedProject, setSelectedProject] = useState(null);
 const [showAddProjectForm, setShowAddProjectForm] = useState(false);
-const [projects, setProjects] = useState(() => {
-    return JSON.parse(localStorage.getItem('projects')) || [];
-});
-
 const inventory = useSelector(state => state.threads); // Grabs the threads from inventory
 const inventoryCodes = inventory.threads.map(thread => thread.dmcCode);
 
@@ -28,26 +27,43 @@ const handleProjectSelect = (project) => {
     checkThreads(requiredThreads, inventoryCodes); // Calls the function to get missing threads
 };
 
-const addProject = (newProject) => {
-    setProjects((prev) => [...prev, newProject]);
+const handleAddProject = (newProject) => {
+    dispatch(addProject(newProject));
+};
+
+const handleDeleteProject = (projectTitle) => {
+    dispatch(deleteProject(projectTitle));
+    if (selectedProject && selectedProject.title === projectTitle) {
+        setSelectedProject(null);
+    }
 };
 
 useEffect(() => {
     localStorage.setItem('projects', JSON.stringify(projects));
 }, [projects]); // Save projects to localStorage whenever they change
 
+// LOAD PROJECTS FROM STORAGE
 useEffect(() => {
-    const savedProjects = localStorage.getItem('projects');
-    if (savedProjects) {
-        setProjects(JSON.parse(savedProjects));
-    }
-}, []); // Load projects from localStorage on initial render
+    const savedProjects = JSON.parse(localStorage.getItem('projects')) || [];
+    dispatch(setProjectsRedux(savedProjects));
+}, [dispatch]);
 
 useEffect(() => {
         if (selectedProject && !projects.some(p => p.title === selectedProject.title)) {
             setSelectedProject(null);
         }
     }, [projects, selectedProject]); // Reset selected project if it is not in the current projects
+
+useEffect(() => {
+    const savedId = localStorage.getItem('selectedProjectId');
+    if (savedId) {
+        const projectToSelect = projects.find(p => p.id === savedId);
+        if (projectToSelect) {
+            setSelectedProject(projectToSelect);
+        }
+        localStorage.removeItem('selectedProjectId');
+    }
+}, [projects]);
 
     return(
         <div className="grid grid-cols-2 h-dvh">
@@ -58,17 +74,20 @@ useEffect(() => {
                     <button className="searchButton">Search</button>
                 </div>
                 <button onClick={() => setShowAddProjectForm(true)} className="bg-gray-400">Add Project</button>
-                <button onClick={() => setProjects([])} className="bg-gray-400">Clear All Project Projects</button>
+                <button onClick={() => dispatch(clearProjects())} className="bg-gray-400">Clear All Project Projects</button>
                 <ProjectList
                     projects={projects}
                     handleProjectSelect={handleProjectSelect}
                     inventoryCodes={inventoryCodes}
                     checkThreads={checkThreads}
+                    handleDeleteProject={handleDeleteProject}
                 />
             </div>
             <div className="bg-violet-400 py-30 px-10">
                 <div>
-                    {showAddProjectForm ? (<AddProjectForm onAddProject={addProject} onClose={() => setShowAddProjectForm(false)} />) : (null)}
+                    {showAddProjectForm ? (<AddProjectForm 
+                    onAddProject={handleAddProject} 
+                    onClose={() => setShowAddProjectForm(false)} />) : (null)}
                 </div>
                 {selectedProject ? (
                 <ProjectDetail

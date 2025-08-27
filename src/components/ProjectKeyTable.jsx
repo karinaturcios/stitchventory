@@ -5,6 +5,11 @@ import { selectQuantityByCode } from '../redux/threadsSlice';
 const ProjectKeyTable = ({ keyTableData }) => {
     console.log('Key Table Data:', keyTableData); // Debugging log
 
+    const quantities = useSelector(state => state.threads);
+
+    const getQuantityOwned = (dmcCode) => {
+        return selectQuantityByCode({threads: quantities}, dmcCode) || 0;
+    };
 
     const getColorSwatch = (dmcCode) => {
         const simplifiedFlossList = Object.values(flossList).map(thread => ({
@@ -29,7 +34,7 @@ const ProjectKeyTable = ({ keyTableData }) => {
                 </thead>
                 <tbody>
                     {keyTableData.map((item, index) => {
-                        const quantityOwned = useSelector(state => selectQuantityByCode(state, item.dmcCode));
+                        const quantityOwned = getQuantityOwned(item.dmcCode);
                         return (
                         <tr key={index}>
                             <td>{item.dmcCode}</td>
@@ -44,7 +49,9 @@ const ProjectKeyTable = ({ keyTableData }) => {
                                 ></div>
                             </td>
                             <td>{item.quantity}</td>
-                            <td>{quantityOwned}</td>
+                            { (quantityOwned >= item.quantity) ? (
+                                <td> ✅ You have this color!</td>) : (<td> ❌ You are missing this color!</td>
+                            )}
                         </tr>
                     )
                     })}

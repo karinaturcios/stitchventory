@@ -1,7 +1,7 @@
 import "../styles/projectdetail.css";
 import ProjectKeyTable from "./ProjectKeyTable";
 
-const ProjectDetail = ({ project, inventoryQuantities }) => {
+const ProjectDetail = ({ project }) => {
     if (!project) {
         return <div>Select a project to see more details</div>
     }
